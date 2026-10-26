@@ -8,42 +8,65 @@ on:
 jobs:
   build:
     name: Build & Package IPA
-    runs-on: macos-14
+    runs-on: macos-13
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Locate Project
+      - name: Setup Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
+          xcodebuild -version
+
+      - name: Locate and Prepare Project
         id: locate
         run: |
-          PROJ_DIR=$(dirname $(find . -name "AzizCal.xcodeproj" | head -n 1))
-          echo "Found project in: $PROJ_DIR"
+          PROJ_DIR=$(dirname $(find . -name "AzizCal.xcodeproj" -type d | head -n 1))
           echo "proj_dir=$PROJ_DIR" >> $GITHUB_OUTPUT
+          echo "Found project in: $PROJ_DIR"
+          cd "$PROJ_DIR"
+          mkdir -p AzizCal.xcodeproj/xcshareddata/xcschemes
+          cat > AzizCal.xcodeproj/xcshareddata/xcschemes/AzizCal.xcscheme << 'SCHEME'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <Scheme LastUpgradeVersion="1500" version="1.7">
+            <BuildAction parallelizeBuildables="YES" buildImplicitDependencies="YES">
+              <BuildActionEntries>
+                <BuildActionEntry buildForRunning="YES" buildForArchiving="YES">
+                  <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="E10100012C00000000000001" BuildableName="AzizCal.app" BlueprintName="AzizCal" ReferencedContainer="container:AzizCal.xcodeproj"/>
+                </BuildActionEntry>
+              </BuildActionEntries>
+            </BuildAction>
+            <ArchiveAction buildConfiguration="Release" revealArchiveInOrganizer="YES"/>
+          </Scheme>
+          SCHEME
 
-      - name: Compile iOS App
+      - name: Build App
         run: |
           cd "${{ steps.locate.outputs.proj_dir }}"
-          xcodebuild build \
+          xcodebuild clean build \
             -project AzizCal.xcodeproj \
             -target AzizCal \
             -configuration Release \
             -sdk iphoneos \
-            CONFIGURATION_BUILD_DIR=build/Release \
+            CONFIGURATION_BUILD_DIR=$(pwd)/build_output \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY="" \
-            AD_HOC_CODE_SIGNING_ALLOWED=YES
+            CODE_SIGN_IDENTITY=- \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES \
+            ONLY_ACTIVE_ARCH=NO
 
-      - name: Package into IPA
+      - name: Create IPA
         run: |
           cd "${{ steps.locate.outputs.proj_dir }}"
+          echo "Looking for built app..."
+          find . -name "AzizCal.app" -type d
           mkdir -p Payload
-          cp -R build/Release/AzizCal.app Payload/
+          cp -R build_output/AzizCal.app Payload/
           zip -r -y AzizCal.ipa Payload
           ls -lh AzizCal.ipa
 
-      - name: Upload IPA Artifact
+      - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: AzizCal-iOS-IPA
