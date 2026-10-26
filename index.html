@@ -1,0 +1,1973 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>عزيز كال | AzizCal</title>
+  
+  <!-- Apple iOS Web App Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="عزيز كال">
+  <meta name="theme-color" content="#121214">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brandGreen: '#22c55e',
+            brandOrange: '#f97316',
+            brandBlue: '#3b82f6',
+            brandYellow: '#eab308',
+            brandRed: '#ef4444',
+            brandPurple: '#a855f7',
+            darkBg: '#0f172a',
+            darkCard: '#1e293b'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* iOS native feel */
+    body {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    input, select, textarea {
+      user-select: text;
+    }
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 16px);
+    }
+    .safe-top {
+      padding-top: env(safe-area-inset-top, 20px);
+    }
+    /* Hide scrollbars */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-brandGreen selection:text-black">
+
+  <!-- MAIN APP CONTAINER -->
+  <div id="app" class="flex-1 flex flex-col max-w-md mx-auto w-full relative pb-20">
+
+    <!-- TOP HEADER -->
+    <header class="sticky top-0 z-30 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/80 px-4 py-3 safe-top flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl">🍏</span>
+        <div>
+          <h1 class="font-bold text-lg leading-tight">عزيز كال</h1>
+          <p id="headerDate" class="text-xs text-slate-400"></p>
+        </div>
+      </div>
+      <button onclick="switchTab(4)" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 active:scale-95 transition">
+        ⚙️
+      </button>
+    </header>
+
+    <!-- CONTENT VIEWS -->
+    <main class="flex-1 p-4 space-y-4">
+
+      <!-- TAB 0: DASHBOARD -->
+      <section id="view-dashboard" class="space-y-4">
+        <!-- Date Bar -->
+        <div class="flex items-center justify-between bg-slate-900 p-2 rounded-2xl border border-slate-800">
+          <button onclick="changeDate(1)" class="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300 active:scale-90 transition">◀</button>
+          <div class="text-center cursor-pointer" onclick="openDateModal()">
+            <span id="currentDateDisplay" class="font-bold text-sm block"></span>
+            <span class="text-[11px] text-brandGreen font-medium">اضغط لتغيير التاريخ 📅</span>
+          </div>
+          <button onclick="changeDate(-1)" class="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300 active:scale-90 transition">▶</button>
+        </div>
+
+        <!-- Calories Circular Ring Card -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 shadow-lg relative overflow-hidden">
+          <div class="flex flex-col items-center justify-center">
+            <div class="relative w-44 h-44 flex items-center justify-center">
+              <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="#1e293b" stroke-width="10" />
+                <circle id="calorieRingProgress" cx="50" cy="50" r="42" fill="none" stroke="#f97316" stroke-width="10"
+                        stroke-linecap="round" stroke-dasharray="263.89" stroke-dashoffset="263.89" class="transition-all duration-700 ease-out" />
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span class="text-xs text-slate-400">المستهلك</span>
+                <span id="dashConsumedCalories" class="text-3xl font-extrabold text-white tracking-tight">0</span>
+                <span id="dashTargetCalories" class="text-xs text-slate-400">من 0 سعرة</span>
+                <span id="dashCaloriePercent" class="text-[11px] font-bold text-brandOrange mt-0.5">0%</span>
+              </div>
+            </div>
+
+            <!-- Surplus or Remaining pill -->
+            <div id="dashCalorieStatus" class="mt-4 px-4 py-1.5 rounded-full text-xs font-bold transition"></div>
+          </div>
+        </div>
+
+        <!-- Macros Breakdown Bars -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 space-y-3">
+          <h3 class="font-bold text-sm text-slate-200">الماكروز اليومية</h3>
+          
+          <!-- Protein -->
+          <div class="space-y-1">
+            <div class="flex justify-between text-xs">
+              <span class="flex items-center gap-1.5 text-blue-400 font-semibold">
+                <span class="w-2 h-2 rounded-full bg-blue-500"></span> البروتين
+              </span>
+              <span id="dashProteinText" class="text-slate-300">0 / 0g</span>
+            </div>
+            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+              <div id="dashProteinBar" class="bg-blue-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Carbs -->
+          <div class="space-y-1">
+            <div class="flex justify-between text-xs">
+              <span class="flex items-center gap-1.5 text-amber-400 font-semibold">
+                <span class="w-2 h-2 rounded-full bg-amber-500"></span> الكربوهيدرات
+              </span>
+              <span id="dashCarbsText" class="text-slate-300">0 / 0g</span>
+            </div>
+            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+              <div id="dashCarbsBar" class="bg-amber-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Fat -->
+          <div class="space-y-1">
+            <div class="flex justify-between text-xs">
+              <span class="flex items-center gap-1.5 text-rose-400 font-semibold">
+                <span class="w-2 h-2 rounded-full bg-rose-500"></span> الدهون
+              </span>
+              <span id="dashFatText" class="text-slate-300">0 / 0g</span>
+            </div>
+            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+              <div id="dashFatBar" class="bg-rose-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-2 gap-3">
+          <button onclick="openAddFoodModal()" class="bg-brandGreen hover:bg-emerald-600 text-slate-950 font-bold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition shadow-lg shadow-green-950/30">
+            <span class="text-lg">＋</span> إضافة طعام
+          </button>
+          <button onclick="openNewWorkoutModal()" class="bg-brandPurple hover:bg-purple-600 text-white font-bold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition shadow-lg shadow-purple-950/30">
+            <span class="text-lg">🏋️‍♂️</span> تسجيل تمرين
+          </button>
+        </div>
+
+        <!-- Today Meals Quick List -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="font-bold text-sm text-slate-200">وجبات اليوم</h3>
+            <button onclick="switchTab(1)" class="text-xs text-brandGreen font-bold">عرض الكل ◀</button>
+          </div>
+          <div id="dashTodayMealsList" class="space-y-2">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+
+        <!-- Today Workouts Quick List -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="font-bold text-sm text-slate-200">تمارين اليوم</h3>
+            <button onclick="switchTab(2)" class="text-xs text-brandPurple font-bold">عرض السجل ◀</button>
+          </div>
+          <div id="dashTodayWorkoutsList" class="space-y-2">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 1: NUTRITION -->
+      <section id="view-nutrition" class="space-y-4 hidden">
+        <div class="flex justify-between items-center">
+          <div>
+            <h2 class="text-xl font-bold">سجل التغذية</h2>
+            <p class="text-xs text-slate-400" id="nutritionDateSubtitle"></p>
+          </div>
+          <button onclick="openSavedFoodsModal()" class="bg-slate-900 border border-slate-800 text-brandGreen text-xs font-bold px-3 py-2 rounded-xl active:scale-95 transition flex items-center gap-1">
+            ⭐ أطعمتي المحفوظة
+          </button>
+        </div>
+
+        <!-- Add Food Button -->
+        <button onclick="openAddFoodModal()" class="w-full bg-brandGreen text-slate-950 font-bold py-3 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition">
+          <span>＋</span> إضافة صنف طعام
+        </button>
+
+        <!-- Meals Grouped Sections -->
+        <div id="nutritionMealsContainer" class="space-y-4">
+          <!-- Injected dynamically for Breakfast, Lunch, Dinner, Snack -->
+        </div>
+      </section>
+
+      <!-- TAB 2: WORKOUTS -->
+      <section id="view-workouts" class="space-y-4 hidden">
+        <!-- In-progress draft banner -->
+        <div id="activeWorkoutDraftBanner" class="hidden bg-purple-950/60 border border-purple-800/80 rounded-2xl p-4">
+          <div class="flex justify-between items-center">
+            <div>
+              <span class="text-xs text-purple-400 font-bold block">حصة تدريبية جارية (مسودة محفوظة)</span>
+              <h4 id="draftWorkoutTitle" class="font-bold text-white text-base"></h4>
+            </div>
+            <button onclick="resumeDraftWorkout()" class="bg-brandPurple text-white text-xs font-bold px-4 py-2 rounded-xl active:scale-95 transition">
+              متابعة الآن ◀
+            </button>
+          </div>
+        </div>
+
+        <!-- Start New Session Button -->
+        <button onclick="openNewWorkoutModal()" class="w-full bg-brandPurple text-white font-bold py-3.5 rounded-2xl flex items-center justify-center gap-2 active:scale-95 transition shadow-lg shadow-purple-950/40">
+          <span class="text-lg">🏋️‍♂️</span> بدء حصة تدريبية جديدة
+        </button>
+
+        <div class="flex justify-between items-center pt-2">
+          <h3 class="font-bold text-base text-slate-200">سجل الحصص السابقة</h3>
+          <span id="workoutsCountBadge" class="text-xs text-slate-400"></span>
+        </div>
+
+        <!-- Past Workouts List -->
+        <div id="pastWorkoutsList" class="space-y-3">
+          <!-- Injected dynamically -->
+        </div>
+      </section>
+
+      <!-- TAB 3: PROGRESS & CHARTS -->
+      <section id="view-progress" class="space-y-4 hidden">
+        <!-- Sub-Tabs: Progression vs Reports -->
+        <div class="flex bg-slate-900 p-1 rounded-2xl border border-slate-800">
+          <button id="progressTabBtn1" onclick="switchProgressTab(0)" class="flex-1 py-2 text-xs font-bold rounded-xl bg-brandGreen text-slate-950 transition">
+            تطور الأوزان
+          </button>
+          <button id="progressTabBtn2" onclick="switchProgressTab(1)" class="flex-1 py-2 text-xs font-bold rounded-xl text-slate-400 transition">
+            التقارير والإحصائيات
+          </button>
+        </div>
+
+        <!-- SUB-TAB 0: EXERCISE PROGRESSION -->
+        <div id="subview-exercise-progress" class="space-y-4">
+          <div class="relative">
+            <input id="exerciseSearchInput" type="text" placeholder="ابحث عن تمرين (مثال: Bench Press)..."
+                   oninput="renderExerciseList()"
+                   class="w-full bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-brandGreen">
+          </div>
+          <div id="exercisesProgressList" class="space-y-3">
+            <!-- Injected dynamically -->
+          </div>
+        </div>
+
+        <!-- SUB-TAB 1: REPORTS & STATS -->
+        <div id="subview-reports" class="space-y-4 hidden">
+          <!-- Timeframe selector -->
+          <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-bold text-slate-400">
+            <button onclick="setTimeframe(7)" class="flex-1 py-1.5 rounded-lg timeframe-btn" data-days="7">أسبوع</button>
+            <button onclick="setTimeframe(30)" class="flex-1 py-1.5 rounded-lg timeframe-btn bg-slate-800 text-white" data-days="30">30 يوم</button>
+            <button onclick="setTimeframe(90)" class="flex-1 py-1.5 rounded-lg timeframe-btn" data-days="90">90 يوم</button>
+            <button onclick="setTimeframe(0)" class="flex-1 py-1.5 rounded-lg timeframe-btn" data-days="0">الكل</button>
+          </div>
+
+          <!-- Explanation box -->
+          <div class="bg-blue-950/40 border border-blue-900/60 rounded-2xl p-3 text-[11px] text-blue-300 flex items-start gap-2">
+            <span class="text-sm">ℹ️</span>
+            <span>يتم حساب المتوسطات بناءً على الأيام الفعلية التي سجلت فيها وجبات فقط، دون احتساب الأيام الفارغة كصفر لتجنب تشويه المعدل الحقيقي.</span>
+          </div>
+
+          <!-- Stats Grid -->
+          <div class="grid grid-cols-2 gap-3" id="statsGrid">
+            <!-- Injected dynamically -->
+          </div>
+
+          <!-- Top Exercises -->
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-2">
+            <h4 class="font-bold text-sm text-slate-200">التمارين الأكثر تسجيلاً</h4>
+            <div id="topExercisesList" class="space-y-1.5">
+              <!-- Injected dynamically -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: SETTINGS -->
+      <section id="view-settings" class="space-y-4 hidden">
+        <h2 class="text-xl font-bold">الإعدادات</h2>
+
+        <!-- Edit Goals Card -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="font-bold text-sm text-slate-200">الأهداف اليومية</h3>
+            <button onclick="openGoalsModal(false)" class="text-xs text-brandGreen font-bold">تعديل الأهداف ✏️</button>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="bg-slate-800/60 p-2.5 rounded-xl">
+              <span class="text-slate-400 block">السعرات</span>
+              <span id="settingsCalGoal" class="font-bold text-brandOrange text-sm">0 kcal</span>
+            </div>
+            <div class="bg-slate-800/60 p-2.5 rounded-xl">
+              <span class="text-slate-400 block">البروتين</span>
+              <span id="settingsProtGoal" class="font-bold text-blue-400 text-sm">0 g</span>
+            </div>
+            <div class="bg-slate-800/60 p-2.5 rounded-xl">
+              <span class="text-slate-400 block">الكربوهيدرات</span>
+              <span id="settingsCarbGoal" class="font-bold text-amber-400 text-sm">0 g</span>
+            </div>
+            <div class="bg-slate-800/60 p-2.5 rounded-xl">
+              <span class="text-slate-400 block">الدهون</span>
+              <span id="settingsFatGoal" class="font-bold text-rose-400 text-sm">0 g</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Backup & Export -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 space-y-3">
+          <h3 class="font-bold text-sm text-slate-200">النسخ الاحتياطي والبيانات</h3>
+          <p class="text-xs text-slate-400">بياناتك مخزنة محلياً 100% على هذا الجهاز ولا تذهب لأي سيرفر خارجي.</p>
+
+          <div class="space-y-2 pt-1">
+            <button onclick="exportJSONBackup()" class="w-full bg-slate-800 hover:bg-slate-700 py-3 rounded-xl text-xs font-bold text-slate-200 flex items-center justify-center gap-2 active:scale-95 transition">
+              💾 تصدير نسخة احتياطية كاملة (JSON)
+            </button>
+            <button onclick="document.getElementById('importFileInput').click()" class="w-full bg-slate-800 hover:bg-slate-700 py-3 rounded-xl text-xs font-bold text-brandGreen flex items-center justify-center gap-2 active:scale-95 transition">
+              📥 استيراد نسخة احتياطية (JSON)
+            </button>
+            <input id="importFileInput" type="file" accept=".json" class="hidden" onchange="importJSONBackup(event)">
+            
+            <button onclick="exportCSV('nutrition')" class="w-full bg-slate-800 hover:bg-slate-700 py-2.5 rounded-xl text-xs font-bold text-slate-400 flex items-center justify-center gap-2 active:scale-95 transition">
+              📊 تصدير سجل الوجبات (CSV)
+            </button>
+            <button onclick="exportCSV('workouts')" class="w-full bg-slate-800 hover:bg-slate-700 py-2.5 rounded-xl text-xs font-bold text-slate-400 flex items-center justify-center gap-2 active:scale-95 transition">
+              🏋️‍♂️ تصدير سجل التمارين (CSV)
+            </button>
+          </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="bg-rose-950/20 border border-rose-900/40 rounded-3xl p-4 space-y-3">
+          <h3 class="font-bold text-sm text-rose-400">المنطقة الحساسة</h3>
+          <div class="space-y-2">
+            <button onclick="confirmResetGoals()" class="w-full bg-slate-900 border border-rose-900/50 hover:bg-rose-950/40 py-2.5 rounded-xl text-xs font-bold text-rose-300 active:scale-95 transition">
+              إعادة تعيين الأهداف فقط
+            </button>
+            <button onclick="confirmResetAll()" class="w-full bg-rose-900 hover:bg-rose-800 py-3 rounded-xl text-xs font-bold text-white active:scale-95 transition">
+              مسح كافة البيانات والبدء من جديد
+            </button>
+          </div>
+        </div>
+
+        <!-- App Info -->
+        <div class="text-center text-xs text-slate-500 pt-4 pb-2">
+          <p>تطبيق عزيز كال (AzizCal)</p>
+          <p class="text-[11px] mt-0.5">يعمل أوفلاين 100% بدون إنترنت وبدون تتبع</p>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- BOTTOM TAB NAVIGATION -->
+    <nav class="fixed bottom-0 inset-x-0 z-40 bg-slate-950/90 backdrop-blur-lg border-t border-slate-800 safe-bottom">
+      <div class="max-w-md mx-auto grid grid-cols-5 text-center py-2">
+        <button onclick="switchTab(0)" class="tab-btn flex flex-col items-center gap-1 text-brandGreen font-bold" data-tab="0">
+          <span class="text-lg">🏠</span>
+          <span class="text-[11px]">الرئيسية</span>
+        </button>
+        <button onclick="switchTab(1)" class="tab-btn flex flex-col items-center gap-1 text-slate-400 font-medium" data-tab="1">
+          <span class="text-lg">🥗</span>
+          <span class="text-[11px]">التغذية</span>
+        </button>
+        <button onclick="switchTab(2)" class="tab-btn flex flex-col items-center gap-1 text-slate-400 font-medium" data-tab="2">
+          <span class="text-lg">🏋️‍♂️</span>
+          <span class="text-[11px]">التمارين</span>
+        </button>
+        <button onclick="switchTab(3)" class="tab-btn flex flex-col items-center gap-1 text-slate-400 font-medium" data-tab="3">
+          <span class="text-lg">📈</span>
+          <span class="text-[11px]">التقدم</span>
+        </button>
+        <button onclick="switchTab(4)" class="tab-btn flex flex-col items-center gap-1 text-slate-400 font-medium" data-tab="4">
+          <span class="text-lg">⚙️</span>
+          <span class="text-[11px]">الإعدادات</span>
+        </button>
+      </div>
+    </nav>
+
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- 1. ONBOARDING & EDIT GOALS MODAL -->
+  <div id="modal-goals" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl">
+      <div class="text-center space-y-1">
+        <span class="text-4xl block">🔥</span>
+        <h3 id="goalsModalTitle" class="text-xl font-bold text-white">إعداد الأهداف اليومية</h3>
+        <p class="text-xs text-slate-400">حدد احتياجاتك اليومية بدقة للبدء في تتبع التغذية.</p>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs font-semibold text-brandOrange block mb-1">السعرات اليومية (kcal) *</label>
+          <input id="inputGoalCalories" type="number" placeholder="مثال: 2200" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-white focus:outline-none focus:border-brandGreen">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-blue-400 block mb-1">البروتين المستهدف (g) *</label>
+          <input id="inputGoalProtein" type="number" placeholder="مثال: 150" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-white focus:outline-none focus:border-brandGreen">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-amber-400 block mb-1">الكربوهيدرات المستهدفة (g) *</label>
+          <input id="inputGoalCarbs" type="number" placeholder="مثال: 250" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-white focus:outline-none focus:border-brandGreen">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-rose-400 block mb-1">الدهون المستهدفة (g) *</label>
+          <input id="inputGoalFat" type="number" placeholder="مثال: 65" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm font-bold text-white focus:outline-none focus:border-brandGreen">
+        </div>
+      </div>
+
+      <div id="goalsErrorMsg" class="text-rose-400 text-xs text-center hidden"></div>
+
+      <button onclick="saveGoals()" class="w-full bg-brandGreen hover:bg-emerald-600 text-slate-950 font-bold py-3.5 rounded-2xl active:scale-95 transition">
+        حفظ الأهداف والبدء
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. ADD / EDIT FOOD MODAL -->
+  <div id="modal-food" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-t-3xl sm:rounded-3xl max-w-md w-full p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 id="foodModalTitle" class="text-lg font-bold text-white">إضافة طعام</h3>
+        <button onclick="closeModal('modal-food')" class="text-slate-400 text-xl font-bold p-1">✕</button>
+      </div>
+
+      <div class="space-y-3 text-sm">
+        <!-- Meal Type Selector -->
+        <div>
+          <label class="text-xs text-slate-400 block mb-1">الوجبة</label>
+          <div class="grid grid-cols-4 gap-1.5 bg-slate-800 p-1 rounded-xl text-xs font-semibold text-center">
+            <button onclick="selectMealType('فطور')" class="meal-btn py-1.5 rounded-lg transition" data-meal="فطور">فطور</button>
+            <button onclick="selectMealType('غداء')" class="meal-btn py-1.5 rounded-lg transition" data-meal="غداء">غداء</button>
+            <button onclick="selectMealType('عشاء')" class="meal-btn py-1.5 rounded-lg transition" data-meal="عشاء">عشاء</button>
+            <button onclick="selectMealType('سناك')" class="meal-btn py-1.5 rounded-lg transition" data-meal="سناك">سناك</button>
+          </div>
+        </div>
+
+        <!-- Quick Choose From Saved Foods -->
+        <div>
+          <label class="text-xs text-slate-400 block mb-1">اختيار سريع من قائمتي المحفوظة</label>
+          <select id="quickSavedFoodSelect" onchange="applySavedFoodToInputs()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200">
+            <option value="">-- أو اختر من أطعمتي المحفوظة بحساب تلقائي --</option>
+          </select>
+        </div>
+
+        <!-- Food Name -->
+        <div>
+          <label class="text-xs text-slate-400 block mb-1">اسم الطعام *</label>
+          <input id="foodInputName" type="text" placeholder="مثال: صدور دجاج مشوية" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brandGreen">
+        </div>
+
+        <!-- Amount and Unit -->
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-xs text-slate-400 block mb-1">الكمية *</label>
+            <input id="foodInputAmount" type="number" step="any" value="100" oninput="onAmountChanged()" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brandGreen font-bold">
+          </div>
+          <div>
+            <label class="text-xs text-slate-400 block mb-1">الوحدة</label>
+            <select id="foodInputUnit" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm focus:outline-none">
+              <option value="غرام">غرام</option>
+              <option value="مل">مل</option>
+              <option value="حصة">حصة/قطعة</option>
+              <option value="بيضة">بيضة</option>
+              <option value="ملعقة">ملعقة</option>
+              <option value="كوب">كوب</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Nutrition Values -->
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <div>
+            <label class="text-xs text-brandOrange font-semibold block mb-1">السعرات (kcal) *</label>
+            <input id="foodInputCalories" type="number" step="any" placeholder="0" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm font-bold text-brandOrange focus:outline-none">
+          </div>
+          <div>
+            <label class="text-xs text-blue-400 font-semibold block mb-1">البروتين (g)</label>
+            <input id="foodInputProtein" type="number" step="any" placeholder="0" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm font-bold text-blue-400 focus:outline-none">
+          </div>
+          <div>
+            <label class="text-xs text-amber-400 font-semibold block mb-1">الكربوهيدرات (g)</label>
+            <input id="foodInputCarbs" type="number" step="any" placeholder="0" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm font-bold text-amber-400 focus:outline-none">
+          </div>
+          <div>
+            <label class="text-xs text-rose-400 font-semibold block mb-1">الدهون (g)</label>
+            <input id="foodInputFat" type="number" step="any" placeholder="0" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm font-bold text-rose-400 focus:outline-none">
+          </div>
+        </div>
+      </div>
+
+      <div id="foodErrorMsg" class="text-rose-400 text-xs hidden"></div>
+
+      <div class="flex gap-2 pt-2">
+        <button onclick="saveFoodRecord()" class="flex-1 bg-brandGreen hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-2xl active:scale-95 transition">
+          حفظ الطعام
+        </button>
+        <button onclick="closeModal('modal-food')" class="px-5 bg-slate-800 text-slate-300 font-bold py-3 rounded-2xl active:scale-95 transition">
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. SAVED FOODS MANAGEMENT MODAL -->
+  <div id="modal-saved-foods" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-5 space-y-4 max-h-[85vh] flex flex-col">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="text-lg font-bold text-white">⭐ أطعمتي المحفوظة</h3>
+        <button onclick="closeModal('modal-saved-foods')" class="text-slate-400 text-xl font-bold p-1">✕</button>
+      </div>
+
+      <!-- Add New Template Button -->
+      <button onclick="openAddSavedFoodTemplateModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-brandGreen font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1 active:scale-95 transition">
+        <span>＋</span> إضافة طعام متكرر جديد
+      </button>
+
+      <!-- Search in Saved Foods -->
+      <input id="savedFoodSearch" type="text" placeholder="ابحث في أطعمتك..." oninput="renderSavedFoodsModalList()"
+             class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs focus:outline-none">
+
+      <!-- List Container -->
+      <div id="savedFoodsModalList" class="flex-1 overflow-y-auto space-y-2 pr-1">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. ADD SAVED FOOD TEMPLATE MODAL -->
+  <div id="modal-add-saved-template" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-5 space-y-3 shadow-2xl">
+      <div class="flex justify-between items-center">
+        <h4 class="font-bold text-white">حفظ طعام في القائمة</h4>
+        <button onclick="closeModal('modal-add-saved-template')" class="text-slate-400 text-lg">✕</button>
+      </div>
+      <div class="space-y-2.5 text-xs">
+        <div>
+          <label class="text-slate-400 block mb-1">اسم الطعام</label>
+          <input id="tmplName" type="text" placeholder="مثال: أرز أبيض" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-slate-400 block mb-1">الكمية المرجعية</label>
+            <input id="tmplBaseAmount" type="number" value="100" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-bold">
+          </div>
+          <div>
+            <label class="text-slate-400 block mb-1">الوحدة</label>
+            <select id="tmplUnit" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+              <option value="غرام">غرام</option>
+              <option value="مل">مل</option>
+              <option value="حصة">حصة</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-brandOrange block mb-1">السعرات (kcal)</label>
+            <input id="tmplCals" type="number" placeholder="130" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm font-bold text-brandOrange">
+          </div>
+          <div>
+            <label class="text-blue-400 block mb-1">البروتين (g)</label>
+            <input id="tmplProt" type="number" placeholder="2.7" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm font-bold text-blue-400">
+          </div>
+          <div>
+            <label class="text-amber-400 block mb-1">الكربوهيدرات (g)</label>
+            <input id="tmplCarbs" type="number" placeholder="28" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm font-bold text-amber-400">
+          </div>
+          <div>
+            <label class="text-rose-400 block mb-1">الدهون (g)</label>
+            <input id="tmplFat" type="number" placeholder="0.3" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-sm font-bold text-rose-400">
+          </div>
+        </div>
+      </div>
+      <button onclick="saveSavedFoodTemplate()" class="w-full bg-brandGreen text-slate-950 font-bold py-3 rounded-2xl active:scale-95 transition mt-2">
+        حفظ في قائمتي
+      </button>
+    </div>
+  </div>
+
+  <!-- 5. ACTIVE WORKOUT SESSION (FULL SCREEN) -->
+  <div id="modal-active-workout" class="fixed inset-0 z-50 bg-slate-950 flex flex-col hidden safe-top">
+    <!-- Workout Header -->
+    <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-900/60 backdrop-blur-md">
+      <div>
+        <span class="text-xs text-brandPurple font-bold block">🏋️‍♂️ حصة تدريبية نشطة</span>
+        <h3 id="activeSessionTitle" class="text-lg font-bold text-white"></h3>
+      </div>
+      <button onclick="minimizeActiveWorkout()" class="bg-slate-800 text-slate-300 text-xs px-3 py-1.5 rounded-xl font-bold">
+        تصغير (حفظ كمسودة)
+      </button>
+    </div>
+
+    <!-- Exercises & Sets List -->
+    <div id="activeWorkoutExercisesList" class="flex-1 overflow-y-auto p-4 space-y-4">
+      <!-- Injected dynamically -->
+    </div>
+
+    <!-- Workout Bottom Actions -->
+    <div class="p-4 border-t border-slate-800 bg-slate-900/90 safe-bottom space-y-2">
+      <button onclick="openAddExerciseModal()" class="w-full bg-slate-800 border border-purple-800/60 text-purple-300 font-bold py-3 rounded-2xl text-xs flex items-center justify-center gap-1 active:scale-95 transition">
+        <span>＋</span> إضافة تمرين للحصة
+      </button>
+      <div class="flex gap-2">
+        <button onclick="finishAndSaveWorkout()" class="flex-1 bg-brandGreen text-slate-950 font-bold py-3 rounded-2xl active:scale-95 transition">
+          إنهاء الحصة وحفظها ✔
+        </button>
+        <button onclick="discardActiveWorkout()" class="px-4 bg-rose-950 border border-rose-800/80 text-rose-300 font-bold py-3 rounded-2xl text-xs active:scale-95 transition">
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. ADD EXERCISE MODAL -->
+  <div id="modal-add-exercise" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center">
+        <h4 class="font-bold text-white">إضافة تمرين</h4>
+        <button onclick="closeModal('modal-add-exercise')" class="text-slate-400 text-lg">✕</button>
+      </div>
+      <div>
+        <label class="text-xs text-slate-400 block mb-1">اسم التمرين المخصص</label>
+        <input id="inputExerciseName" type="text" placeholder="مثال: Bench Press أو سحب ظهر" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brandPurple">
+      </div>
+      <div>
+        <span class="text-xs text-slate-400 block mb-1">مقترحات شائعة:</span>
+        <div class="flex flex-wrap gap-1.5">
+          <button onclick="setExerciseSuggestion('Bench Press')" class="bg-slate-800 text-xs px-2.5 py-1 rounded-lg text-slate-300">Bench Press</button>
+          <button onclick="setExerciseSuggestion('Squat')" class="bg-slate-800 text-xs px-2.5 py-1 rounded-lg text-slate-300">Squat</button>
+          <button onclick="setExerciseSuggestion('Lat Pulldown')" class="bg-slate-800 text-xs px-2.5 py-1 rounded-lg text-slate-300">Lat Pulldown</button>
+          <button onclick="setExerciseSuggestion('Overhead Press')" class="bg-slate-800 text-xs px-2.5 py-1 rounded-lg text-slate-300">Overhead Press</button>
+          <button onclick="setExerciseSuggestion('Biceps Curl')" class="bg-slate-800 text-xs px-2.5 py-1 rounded-lg text-slate-300">Biceps Curl</button>
+          <button onclick="setExerciseSuggestion('Leg Extension')" class="bg-slate-800 text-xs px-2.5 py-1 rounded-lg text-slate-300">Leg Extension</button>
+          <button onclick="setExerciseSuggestion('تمرين ضغط (Push-up)')" class="bg-slate-800 text-xs px-2.5 py-1 rounded-lg text-slate-300">Push-up</button>
+        </div>
+      </div>
+      <button onclick="addExerciseToActiveWorkout()" class="w-full bg-brandPurple text-white font-bold py-3 rounded-2xl active:scale-95 transition">
+        إضافة التمرين
+      </button>
+    </div>
+  </div>
+
+  <!-- 7. START NEW WORKOUT MODAL -->
+  <div id="modal-start-workout" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center">
+        <h4 class="font-bold text-white text-base">بدء حصة تدريبية جديدة</h4>
+        <button onclick="closeModal('modal-start-workout')" class="text-slate-400 text-lg">✕</button>
+      </div>
+      <div>
+        <label class="text-xs text-slate-400 block mb-1">اسم الحصة (أو اختر من الشائع)</label>
+        <input id="inputWorkoutTitle" type="text" value="Push" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white font-bold focus:outline-none focus:border-brandPurple">
+      </div>
+      <div class="flex flex-wrap gap-1.5">
+        <button onclick="setWorkoutTitlePreset('Push')" class="bg-slate-800 text-xs px-3 py-1.5 rounded-lg text-slate-300 font-bold">Push</button>
+        <button onclick="setWorkoutTitlePreset('Pull')" class="bg-slate-800 text-xs px-3 py-1.5 rounded-lg text-slate-300 font-bold">Pull</button>
+        <button onclick="setWorkoutTitlePreset('Legs')" class="bg-slate-800 text-xs px-3 py-1.5 rounded-lg text-slate-300 font-bold">Legs</button>
+        <button onclick="setWorkoutTitlePreset('صدر وتراي')" class="bg-slate-800 text-xs px-3 py-1.5 rounded-lg text-slate-300 font-bold">صدر وتراي</button>
+        <button onclick="setWorkoutTitlePreset('أرجل وبطن')" class="bg-slate-800 text-xs px-3 py-1.5 rounded-lg text-slate-300 font-bold">أرجل وبطن</button>
+      </div>
+      <button onclick="startWorkoutSession()" class="w-full bg-brandPurple text-white font-bold py-3.5 rounded-2xl active:scale-95 transition shadow-lg shadow-purple-950/40">
+        بدء الحصة الآن ▶
+      </button>
+    </div>
+  </div>
+
+  <!-- 8. EXERCISE DETAIL & CHART MODAL -->
+  <div id="modal-exercise-detail" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-5 space-y-4 max-h-[85vh] flex flex-col">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 id="exDetailTitle" class="text-lg font-bold text-white"></h3>
+        <button onclick="closeModal('modal-exercise-detail')" class="text-slate-400 text-xl font-bold p-1">✕</button>
+      </div>
+
+      <!-- PR Card -->
+      <div class="bg-purple-950/40 border border-purple-800/60 rounded-2xl p-4 flex justify-between items-center">
+        <div>
+          <span class="text-xs text-purple-400 font-bold block">🏆 أفضل أداء مسجل (PR)</span>
+          <span class="text-[11px] text-slate-400">أعلى وزن تم رفعه في مجموعة</span>
+        </div>
+        <div class="text-left">
+          <span id="exDetailPRWeight" class="text-2xl font-black text-white block">0 كجم</span>
+          <span id="exDetailPRReps" class="text-xs text-purple-300"></span>
+        </div>
+      </div>
+
+      <!-- SVG Chart -->
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-2">
+        <span class="text-xs text-slate-400 font-bold block">منحنى تطور الوزن عبر الجلسات</span>
+        <div id="exDetailChartContainer" class="h-40 flex items-center justify-center">
+          <!-- Injected SVG Chart -->
+        </div>
+      </div>
+
+      <!-- History Log -->
+      <div class="flex-1 overflow-y-auto space-y-2 pr-1" id="exDetailHistoryList">
+        <!-- Injected list -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. DATE PICKER MODAL -->
+  <div id="modal-date" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl text-center">
+      <h4 class="font-bold text-white">اختر التاريخ</h4>
+      <input id="datePickerInput" type="date" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white text-center font-bold focus:outline-none">
+      <div class="flex gap-2">
+        <button onclick="applySelectedDate()" class="flex-1 bg-brandGreen text-slate-950 font-bold py-2.5 rounded-xl text-xs active:scale-95 transition">
+          عرض هذا اليوم
+        </button>
+        <button onclick="closeModal('modal-date')" class="px-4 bg-slate-800 text-slate-300 font-bold py-2.5 rounded-xl text-xs active:scale-95 transition">
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT APP LOGIC -->
+  <script>
+    // ================= STATE & PERSISTENCE =================
+    const STORAGE_KEY = 'azizcal_data_v1';
+
+    let appData = {
+      goals: null, // { calories, protein, carbs, fat }
+      foods: [],   // [ { id, name, amount, unit, calories, protein, carbs, fat, mealType, date } ]
+      savedFoods: [
+        { id: '1', name: 'صدور دجاج مشوية', baseAmount: 100, unit: 'غرام', calories: 165, protein: 31, carbs: 0, fat: 3.6, isFavorite: true },
+        { id: '2', name: 'أرز أبيض مطبوخ', baseAmount: 100, unit: 'غرام', calories: 130, protein: 2.7, carbs: 28.2, fat: 0.3, isFavorite: true },
+        { id: '3', name: 'خبز توست أسمر', baseAmount: 1, unit: 'قطعة', calories: 75, protein: 3.5, carbs: 13, fat: 1, isFavorite: true },
+        { id: '4', name: 'زبادي يوناني سادة', baseAmount: 100, unit: 'غرام', calories: 59, protein: 10, carbs: 3.6, fat: 0.4, isFavorite: true },
+        { id: '5', name: 'مسحوق بروتين (واي)', baseAmount: 30, unit: 'غرام', calories: 120, protein: 24, carbs: 2, fat: 1.5, isFavorite: true },
+        { id: '6', name: 'بيض مسلوق كامل', baseAmount: 1, unit: 'بيضة', calories: 78, protein: 6.3, carbs: 0.6, fat: 5.3, isFavorite: true }
+      ],
+      workouts: [], // [ { id, title, date, exercises: [ { id, name, sets: [ { setNumber, weight, reps, isBodyweight, isCompleted } ] } ] } ]
+      activeDraft: null // ongoing workout draft autosave
+    };
+
+    let selectedDate = new Date();
+    let currentTab = 0;
+    let selectedMealType = 'فطور';
+    let editingFoodId = null;
+    let currentStatsDays = 30;
+
+    // Load from LocalStorage
+    function loadData() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          appData = { ...appData, ...parsed };
+        } catch (e) {
+          console.error("Failed to parse data", e);
+        }
+      }
+    }
+
+    // Save to LocalStorage
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+    }
+
+    // Date Helper (yyyy-mm-dd)
+    function formatDateKey(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatArabicDate(d) {
+      const today = new Date();
+      if (formatDateKey(d) === formatDateKey(today)) return 'اليوم';
+      const yesterday = new Date();
+      yesterday.setDate(today.getDate() - 1);
+      if (formatDateKey(d) === formatDateKey(yesterday)) return 'أمس';
+      const tomorrow = new Date();
+      tomorrow.setDate(today.getDate() + 1);
+      if (formatDateKey(d) === formatDateKey(tomorrow)) return 'غداً';
+      
+      const options = { weekday: 'short', month: 'short', day: 'numeric' };
+      return d.toLocaleDateString('ar-SA', options);
+    }
+
+    // ================= APP INITIALIZATION =================
+    window.addEventListener('DOMContentLoaded', () => {
+      loadData();
+
+      // Check onboarding
+      if (!appData.goals) {
+        openGoalsModal(true);
+      }
+
+      // Check active workout draft
+      if (appData.activeDraft) {
+        showDraftBanner();
+      }
+
+      renderAll();
+    });
+
+    function renderAll() {
+      updateDateDisplays();
+      renderDashboard();
+      renderNutrition();
+      renderWorkouts();
+      renderExerciseList();
+      renderReports();
+      renderSettings();
+    }
+
+    // ================= DATE NAVIGATION =================
+    function changeDate(daysOffset) {
+      selectedDate.setDate(selectedDate.getDate() + daysOffset);
+      renderAll();
+    }
+
+    function updateDateDisplays() {
+      const text = formatArabicDate(selectedDate);
+      document.getElementById('headerDate').innerText = text;
+      document.getElementById('currentDateDisplay').innerText = text;
+      document.getElementById('nutritionDateSubtitle').innerText = 'عرض السجلات لـ: ' + text;
+    }
+
+    function openDateModal() {
+      document.getElementById('datePickerInput').value = formatDateKey(selectedDate);
+      openModal('modal-date');
+    }
+
+    function applySelectedDate() {
+      const val = document.getElementById('datePickerInput').value;
+      if (val) {
+        const parts = val.split('-');
+        selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
+        closeModal('modal-date');
+        renderAll();
+      }
+    }
+
+    // ================= TABS NAVIGATION =================
+    function switchTab(tabIndex) {
+      currentTab = tabIndex;
+      const viewIds = ['view-dashboard', 'view-nutrition', 'view-workouts', 'view-progress', 'view-settings'];
+      viewIds.forEach((id, idx) => {
+        const el = document.getElementById(id);
+        if (idx === tabIndex) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      // Update Nav button styles
+      document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+        if (idx === tabIndex) {
+          btn.className = 'tab-btn flex flex-col items-center gap-1 text-brandGreen font-bold';
+        } else {
+          btn.className = 'tab-btn flex flex-col items-center gap-1 text-slate-400 font-medium';
+        }
+      });
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ================= GOALS MODAL & LOGIC =================
+    function openGoalsModal(isOnboarding = false) {
+      document.getElementById('goalsModalTitle').innerText = isOnboarding ? 'إعداد الأهداف اليومية' : 'تعديل الأهداف اليومية';
+      if (appData.goals) {
+        document.getElementById('inputGoalCalories').value = appData.goals.calories || '';
+        document.getElementById('inputGoalProtein').value = appData.goals.protein || '';
+        document.getElementById('inputGoalCarbs').value = appData.goals.carbs || '';
+        document.getElementById('inputGoalFat').value = appData.goals.fat || '';
+      }
+      openModal('modal-goals');
+    }
+
+    function saveGoals() {
+      const cals = parseFloat(document.getElementById('inputGoalCalories').value);
+      const prot = parseFloat(document.getElementById('inputGoalProtein').value) || 0;
+      const carbs = parseFloat(document.getElementById('inputGoalCarbs').value) || 0;
+      const fat = parseFloat(document.getElementById('inputGoalFat').value) || 0;
+
+      const errEl = document.getElementById('goalsErrorMsg');
+      if (!cals || cals <= 0 || isNaN(cals)) {
+        errEl.innerText = 'يرجى إدخال سعرات حرارية صالحة أكبر من صفر';
+        errEl.classList.remove('hidden');
+        return;
+      }
+      if (prot < 0 || carbs < 0 || fat < 0) {
+        errEl.innerText = 'لا يمكن أن تكون قيم الماكروز سالبة';
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      errEl.classList.add('hidden');
+      appData.goals = { calories: cals, protein: prot, carbs: carbs, fat: fat };
+      saveData();
+      closeModal('modal-goals');
+      renderAll();
+    }
+
+    // ================= DASHBOARD RENDER =================
+    function renderDashboard() {
+      const targetCals = appData.goals ? appData.goals.calories : 2000;
+      const targetProt = appData.goals ? appData.goals.protein : 150;
+      const targetCarbs = appData.goals ? appData.goals.carbs : 200;
+      const targetFat = appData.goals ? appData.goals.fat : 60;
+
+      const dayKey = formatDateKey(selectedDate);
+      const dayFoods = appData.foods.filter(f => f.date === dayKey);
+
+      const consumedCals = Math.round(dayFoods.reduce((acc, f) => acc + (f.calories || 0), 0));
+      const consumedProt = Math.round(dayFoods.reduce((acc, f) => acc + (f.protein || 0), 0));
+      const consumedCarbs = Math.round(dayFoods.reduce((acc, f) => acc + (f.carbs || 0), 0));
+      const consumedFat = Math.round(dayFoods.reduce((acc, f) => acc + (f.fat || 0), 0));
+
+      document.getElementById('dashConsumedCalories').innerText = consumedCals;
+      document.getElementById('dashTargetCalories').innerText = `من ${targetCals} سعرة`;
+
+      const percent = targetCals > 0 ? Math.round((consumedCals / targetCals) * 100) : 0;
+      document.getElementById('dashCaloriePercent').innerText = `${percent}%`;
+
+      // SVG Ring
+      const circleCircumference = 263.89;
+      const progress = Math.min(1.0, consumedCals / Math.max(1, targetCals));
+      const offset = circleCircumference - (progress * circleCircumference);
+      const ring = document.getElementById('calorieRingProgress');
+      ring.style.strokeDashoffset = offset;
+
+      const statusEl = document.getElementById('dashCalorieStatus');
+      if (consumedCals > targetCals) {
+        const surplus = consumedCals - targetCals;
+        ring.setAttribute('stroke', '#ef4444');
+        statusEl.className = 'mt-4 px-4 py-1.5 rounded-full text-xs font-bold bg-rose-950/80 text-rose-300 border border-rose-800';
+        statusEl.innerText = `⚠️ تجاوزت الهدف بمقدار ${surplus} سعرة`;
+      } else {
+        const rem = targetCals - consumedCals;
+        ring.setAttribute('stroke', '#f97316');
+        statusEl.className = 'mt-4 px-4 py-1.5 rounded-full text-xs font-bold bg-emerald-950/80 text-emerald-300 border border-emerald-800';
+        statusEl.innerText = `المتبقي: ${rem} سعرة`;
+      }
+
+      // Macros
+      document.getElementById('dashProteinText').innerText = `${consumedProt} / ${targetProt}g`;
+      document.getElementById('dashProteinBar').style.width = Math.min(100, (consumedProt / Math.max(1, targetProt)) * 100) + '%';
+
+      document.getElementById('dashCarbsText').innerText = `${consumedCarbs} / ${targetCarbs}g`;
+      document.getElementById('dashCarbsBar').style.width = Math.min(100, (consumedCarbs / Math.max(1, targetCarbs)) * 100) + '%';
+
+      document.getElementById('dashFatText').innerText = `${consumedFat} / ${targetFat}g`;
+      document.getElementById('dashFatBar').style.width = Math.min(100, (consumedFat / Math.max(1, targetFat)) * 100) + '%';
+
+      // Today Meals List
+      const mealsContainer = document.getElementById('dashTodayMealsList');
+      mealsContainer.innerHTML = '';
+      if (dayFoods.length === 0) {
+        mealsContainer.innerHTML = '<p class="text-xs text-slate-500 py-1">لم تسجل أي وجبة في هذا اليوم بعد.</p>';
+      } else {
+        const mealTypes = ['فطور', 'غداء', 'عشاء', 'سناك'];
+        mealTypes.forEach(mType => {
+          const mFoods = dayFoods.filter(f => f.mealType === mType);
+          if (mFoods.length > 0) {
+            const mCals = Math.round(mFoods.reduce((acc, f) => acc + f.calories, 0));
+            mealsContainer.innerHTML += `
+              <div class="flex justify-between items-center text-xs py-1 border-b border-slate-800/60 last:border-0">
+                <span class="text-slate-300 font-semibold">${mType} (${mFoods.length})</span>
+                <span class="text-brandOrange font-bold">${mCals} kcal</span>
+              </div>
+            `;
+          }
+        });
+      }
+
+      // Today Workouts List
+      const workoutsContainer = document.getElementById('dashTodayWorkoutsList');
+      workoutsContainer.innerHTML = '';
+      const dayWorkouts = appData.workouts.filter(w => w.date === dayKey);
+      if (dayWorkouts.length === 0) {
+        workoutsContainer.innerHTML = '<p class="text-xs text-slate-500 py-1">لا توجد تمارين مسجلة لهذا التاريخ.</p>';
+      } else {
+        dayWorkouts.forEach(w => {
+          const setsCount = w.exercises.reduce((acc, ex) => acc + ex.sets.length, 0);
+          workoutsContainer.innerHTML += `
+            <div class="flex justify-between items-center text-xs py-1.5 border-b border-slate-800/60 last:border-0">
+              <div>
+                <span class="font-bold text-white block">${w.title}</span>
+                <span class="text-[11px] text-slate-400">${w.exercises.length} تمارين • ${setsCount} مجموعة</span>
+              </div>
+              <span class="text-emerald-400 font-bold">✔ مكتملة</span>
+            </div>
+          `;
+        });
+      }
+    }
+
+    // ================= NUTRITION & FOOD RECORDS =================
+    function renderNutrition() {
+      const dayKey = formatDateKey(selectedDate);
+      const dayFoods = appData.foods.filter(f => f.date === dayKey);
+      const container = document.getElementById('nutritionMealsContainer');
+      container.innerHTML = '';
+
+      const meals = [
+        { type: 'فطور', icon: '🌅' },
+        { type: 'غداء', icon: '☀️' },
+        { type: 'عشاء', icon: '🌙' },
+        { type: 'سناك', icon: '🍏' }
+      ];
+
+      meals.forEach(meal => {
+        const items = dayFoods.filter(f => f.mealType === meal.type);
+        const mealCals = Math.round(items.reduce((acc, f) => acc + f.calories, 0));
+        const mealProt = Math.round(items.reduce((acc, f) => acc + f.protein, 0));
+        const mealCarbs = Math.round(items.reduce((acc, f) => acc + f.carbs, 0));
+        const mealFat = Math.round(items.reduce((acc, f) => acc + f.fat, 0));
+
+        let itemsHtml = '';
+        if (items.length === 0) {
+          itemsHtml = '<p class="text-xs text-slate-500 py-1">لا توجد أصناف مسجلة في هذه الوجبة.</p>';
+        } else {
+          items.forEach(item => {
+            itemsHtml += `
+              <div class="flex items-center justify-between py-2 border-b border-slate-800/60 last:border-0">
+                <div>
+                  <h4 class="font-bold text-sm text-white">${item.name}</h4>
+                  <p class="text-[11px] text-slate-400">
+                    ${item.amount} ${item.unit} • <span class="text-brandOrange font-bold">${item.calories} kcal</span>
+                    • P:${item.protein}g C:${item.carbs}g F:${item.fat}g
+                  </p>
+                </div>
+                <div class="flex items-center gap-1">
+                  <button onclick="repeatFoodToCurrentDate('${item.id}')" title="تكرار الصنف في اليوم الحالي" class="p-1 text-slate-400 hover:text-white">🔁</button>
+                  <button onclick="editFoodRecord('${item.id}')" title="تعديل" class="p-1 text-slate-400 hover:text-white">✏️</button>
+                  <button onclick="deleteFoodRecord('${item.id}')" title="حذف" class="p-1 text-slate-400 hover:text-rose-400">🗑️</button>
+                </div>
+              </div>
+            `;
+          });
+        }
+
+        container.innerHTML += `
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 space-y-2">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+              <div class="flex items-center gap-1.5">
+                <span class="text-base">${meal.icon}</span>
+                <h3 class="font-bold text-sm text-white">${meal.type}</h3>
+              </div>
+              <div class="text-left">
+                <span class="text-sm font-bold text-brandOrange">${mealCals} kcal</span>
+                ${items.length > 0 ? `<button onclick="copyMealPrompt('${meal.type}')" class="text-[11px] text-brandGreen font-bold block">نسخ الوجبة 📑</button>` : ''}
+              </div>
+            </div>
+
+            <div class="space-y-1">
+              ${itemsHtml}
+            </div>
+
+            <button onclick="openAddFoodModal('${meal.type}')" class="w-full text-xs text-brandGreen font-bold py-1.5 border border-dashed border-slate-700/80 rounded-xl hover:bg-slate-800/40 transition">
+              ＋ إضافة إلى ${meal.type}
+            </button>
+          </div>
+        `;
+      });
+    }
+
+    function openAddFoodModal(mealType = 'فطور') {
+      editingFoodId = null;
+      document.getElementById('foodModalTitle').innerText = 'إضافة صنف طعام';
+      selectMealType(mealType);
+
+      document.getElementById('foodInputName').value = '';
+      document.getElementById('foodInputAmount').value = '100';
+      document.getElementById('foodInputUnit').value = 'غرام';
+      document.getElementById('foodInputCalories').value = '';
+      document.getElementById('foodInputProtein').value = '';
+      document.getElementById('foodInputCarbs').value = '';
+      document.getElementById('foodInputFat').value = '';
+
+      populateSavedFoodsDropdown();
+      openModal('modal-food');
+    }
+
+    function selectMealType(m) {
+      selectedMealType = m;
+      document.querySelectorAll('.meal-btn').forEach(btn => {
+        if (btn.dataset.meal === m) {
+          btn.className = 'meal-btn py-1.5 rounded-lg bg-brandGreen text-slate-950 font-bold transition';
+        } else {
+          btn.className = 'meal-btn py-1.5 rounded-lg text-slate-400 font-semibold transition';
+        }
+      });
+    }
+
+    function populateSavedFoodsDropdown() {
+      const select = document.getElementById('quickSavedFoodSelect');
+      select.innerHTML = '<option value="">-- أو اختر من أطعمتي المحفوظة بحساب تلقائي --</option>';
+      appData.savedFoods.forEach(sf => {
+        select.innerHTML += `<option value="${sf.id}">${sf.name} (${sf.calories} kcal / ${sf.baseAmount} ${sf.unit})</option>`;
+      });
+    }
+
+    let activeSavedFoodTemplate = null;
+    function applySavedFoodToInputs() {
+      const id = document.getElementById('quickSavedFoodSelect').value;
+      if (!id) {
+        activeSavedFoodTemplate = null;
+        return;
+      }
+      const sf = appData.savedFoods.find(f => f.id === id);
+      if (sf) {
+        activeSavedFoodTemplate = sf;
+        document.getElementById('foodInputName').value = sf.name;
+        document.getElementById('foodInputAmount').value = sf.baseAmount;
+        document.getElementById('foodInputUnit').value = sf.unit;
+        document.getElementById('foodInputCalories').value = sf.calories;
+        document.getElementById('foodInputProtein').value = sf.protein;
+        document.getElementById('foodInputCarbs').value = sf.carbs;
+        document.getElementById('foodInputFat').value = sf.fat;
+      }
+    }
+
+    // Auto-calculate macros when user edits amount for a saved food
+    function onAmountChanged() {
+      if (!activeSavedFoodTemplate) return;
+      const amount = parseFloat(document.getElementById('foodInputAmount').value);
+      if (amount && amount > 0 && activeSavedFoodTemplate.baseAmount > 0) {
+        const ratio = amount / activeSavedFoodTemplate.baseAmount;
+        document.getElementById('foodInputCalories').value = Math.round(activeSavedFoodTemplate.calories * ratio * 10) / 10;
+        document.getElementById('foodInputProtein').value = Math.round(activeSavedFoodTemplate.protein * ratio * 10) / 10;
+        document.getElementById('foodInputCarbs').value = Math.round(activeSavedFoodTemplate.carbs * ratio * 10) / 10;
+        document.getElementById('foodInputFat').value = Math.round(activeSavedFoodTemplate.fat * ratio * 10) / 10;
+      }
+    }
+
+    function saveFoodRecord() {
+      const name = document.getElementById('foodInputName').value.trim();
+      const amount = parseFloat(document.getElementById('foodInputAmount').value);
+      const unit = document.getElementById('foodInputUnit').value;
+      const cals = parseFloat(document.getElementById('foodInputCalories').value);
+      const prot = parseFloat(document.getElementById('foodInputProtein').value) || 0;
+      const carbs = parseFloat(document.getElementById('foodInputCarbs').value) || 0;
+      const fat = parseFloat(document.getElementById('foodInputFat').value) || 0;
+
+      const errEl = document.getElementById('foodErrorMsg');
+      if (!name) {
+        errEl.innerText = 'يرجى كتابة اسم الطعام';
+        errEl.classList.remove('hidden');
+        return;
+      }
+      if (isNaN(cals) || cals < 0) {
+        errEl.innerText = 'يرجى إدخال السعرات بشكل صحيح';
+        errEl.classList.remove('hidden');
+        return;
+      }
+
+      errEl.classList.add('hidden');
+
+      if (editingFoodId) {
+        const idx = appData.foods.findIndex(f => f.id === editingFoodId);
+        if (idx !== -1) {
+          appData.foods[idx] = {
+            ...appData.foods[idx],
+            name, amount, unit, calories: cals, protein: prot, carbs, fat,
+            mealType: selectedMealType
+          };
+        }
+      } else {
+        const newRecord = {
+          id: Date.now().toString(),
+          name, amount, unit, calories: cals, protein: prot, carbs, fat,
+          mealType: selectedMealType,
+          date: formatDateKey(selectedDate)
+        };
+        appData.foods.unshift(newRecord);
+      }
+
+      saveData();
+      closeModal('modal-food');
+      renderAll();
+    }
+
+    function editFoodRecord(id) {
+      const food = appData.foods.find(f => f.id === id);
+      if (!food) return;
+      editingFoodId = id;
+      activeSavedFoodTemplate = null;
+
+      document.getElementById('foodModalTitle').innerText = 'تعديل صنف طعام';
+      selectMealType(food.mealType);
+      document.getElementById('foodInputName').value = food.name;
+      document.getElementById('foodInputAmount').value = food.amount;
+      document.getElementById('foodInputUnit').value = food.unit;
+      document.getElementById('foodInputCalories').value = food.calories;
+      document.getElementById('foodInputProtein').value = food.protein;
+      document.getElementById('foodInputCarbs').value = food.carbs;
+      document.getElementById('foodInputFat').value = food.fat;
+
+      populateSavedFoodsDropdown();
+      openModal('modal-food');
+    }
+
+    function deleteFoodRecord(id) {
+      if (confirm('هل أنت متأكد من حذف هذا السجل؟')) {
+        appData.foods = appData.foods.filter(f => f.id !== id);
+        saveData();
+        renderAll();
+      }
+    }
+
+    function repeatFoodToCurrentDate(id) {
+      const food = appData.foods.find(f => f.id === id);
+      if (!food) return;
+      const copy = { ...food, id: Date.now().toString(), date: formatDateKey(new Date()) };
+      appData.foods.unshift(copy);
+      saveData();
+      alert(`تم نسخ "${food.name}" بنجاح إلى سجل اليوم!`);
+      renderAll();
+    }
+
+    function copyMealPrompt(mealType) {
+      const targetDateStr = prompt('أدخل التاريخ الذي تريد نسخ الوجبة إليه بصيغة YYYY-MM-DD:', formatDateKey(new Date()));
+      if (targetDateStr) {
+        const sourceFoods = appData.foods.filter(f => f.date === formatDateKey(selectedDate) && f.mealType === mealType);
+        if (sourceFoods.length === 0) {
+          alert('الوجبة فارغة!');
+          return;
+        }
+        sourceFoods.forEach(f => {
+          appData.foods.unshift({ ...f, id: Math.random().toString(), date: targetDateStr });
+        });
+        saveData();
+        alert(`تم نسخ وجبة (${mealType}) بنجاح إلى تاريخ ${targetDateStr}!`);
+        renderAll();
+      }
+    }
+
+    // ================= SAVED FOODS MANAGEMENT =================
+    function openSavedFoodsModal() {
+      renderSavedFoodsModalList();
+      openModal('modal-saved-foods');
+    }
+
+    function renderSavedFoodsModalList() {
+      const query = (document.getElementById('savedFoodSearch').value || '').trim().toLowerCase();
+      const container = document.getElementById('savedFoodsModalList');
+      container.innerHTML = '';
+
+      const list = appData.savedFoods.filter(f => f.name.toLowerCase().includes(query));
+      if (list.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-500 py-3 text-center">لا توجد أطعمة محفوظة تطابق البحث.</p>';
+        return;
+      }
+
+      list.forEach(sf => {
+        container.innerHTML += `
+          <div class="bg-slate-800/80 p-3 rounded-2xl flex justify-between items-center text-xs">
+            <div>
+              <span class="font-bold text-white text-sm block">${sf.name}</span>
+              <span class="text-slate-400">${sf.calories} kcal لكل ${sf.baseAmount} ${sf.unit}</span>
+              <span class="text-[11px] text-blue-300 block">P:${sf.protein}g C:${sf.carbs}g F:${sf.fat}g</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <button onclick="deleteSavedFoodTemplate('${sf.id}')" class="text-slate-500 hover:text-rose-400 p-1 text-sm">🗑️</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function openAddSavedFoodTemplateModal() {
+      document.getElementById('tmplName').value = '';
+      document.getElementById('tmplBaseAmount').value = '100';
+      document.getElementById('tmplCals').value = '';
+      document.getElementById('tmplProt').value = '';
+      document.getElementById('tmplCarbs').value = '';
+      document.getElementById('tmplFat').value = '';
+      openModal('modal-add-saved-template');
+    }
+
+    function saveSavedFoodTemplate() {
+      const name = document.getElementById('tmplName').value.trim();
+      const baseAmount = parseFloat(document.getElementById('tmplBaseAmount').value) || 100;
+      const unit = document.getElementById('tmplUnit').value;
+      const calories = parseFloat(document.getElementById('tmplCals').value);
+      const protein = parseFloat(document.getElementById('tmplProt').value) || 0;
+      const carbs = parseFloat(document.getElementById('tmplCarbs').value) || 0;
+      const fat = parseFloat(document.getElementById('tmplFat').value) || 0;
+
+      if (!name || isNaN(calories) || calories < 0) {
+        alert('يرجى كتابة اسم الطعام والسعرات بشكل صحيح');
+        return;
+      }
+
+      const item = { id: Date.now().toString(), name, baseAmount, unit, calories, protein, carbs, fat, isFavorite: true };
+      appData.savedFoods.push(item);
+      saveData();
+      closeModal('modal-add-saved-template');
+      renderSavedFoodsModalList();
+    }
+
+    function deleteSavedFoodTemplate(id) {
+      if (confirm('حذف هذا الصنف من أطعمتك المحفوظة؟')) {
+        appData.savedFoods = appData.savedFoods.filter(f => f.id !== id);
+        saveData();
+        renderSavedFoodsModalList();
+      }
+    }
+
+    // ================= WORKOUTS & AUTOSAVE DRAFT =================
+    let activeSession = null;
+
+    function renderWorkouts() {
+      // Draft banner
+      if (appData.activeDraft) {
+        document.getElementById('activeWorkoutDraftBanner').classList.remove('hidden');
+        document.getElementById('draftWorkoutTitle').innerText = appData.activeDraft.title;
+      } else {
+        document.getElementById('activeWorkoutDraftBanner').classList.add('hidden');
+      }
+
+      // Past workouts
+      const container = document.getElementById('pastWorkoutsList');
+      container.innerHTML = '';
+      document.getElementById('workoutsCountBadge').innerText = `(${appData.workouts.length} حصة مسجلة)`;
+
+      if (appData.workouts.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-500 py-6 text-center">لا توجد حصص تدريبية سابقة بعد. ابدأ أول تمرين الآن!</p>';
+        return;
+      }
+
+      appData.workouts.forEach(w => {
+        const setsCount = w.exercises.reduce((acc, ex) => acc + ex.sets.length, 0);
+        let exSummary = w.exercises.map(e => e.name).slice(0, 3).join(' • ');
+        if (w.exercises.length > 3) exSummary += ' ...';
+
+        container.innerHTML += `
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 space-y-2">
+            <div class="flex justify-between items-start">
+              <div>
+                <h4 class="font-bold text-white text-base">${w.title}</h4>
+                <p class="text-xs text-slate-400">${w.date} • ${w.exercises.length} تمارين • ${setsCount} مجموعات</p>
+              </div>
+              <div class="flex items-center gap-1">
+                <button onclick="repeatWorkoutToToday('${w.id}')" title="تكرار الحصة لليوم" class="p-1 text-slate-400 hover:text-purple-400">🔁</button>
+                <button onclick="deleteWorkout('${w.id}')" title="حذف" class="p-1 text-slate-400 hover:text-rose-400">🗑️</button>
+              </div>
+            </div>
+            <p class="text-xs text-purple-300 font-medium">${exSummary}</p>
+          </div>
+        `;
+      });
+    }
+
+    function openNewWorkoutModal() {
+      openModal('modal-start-workout');
+    }
+
+    function setWorkoutTitlePreset(t) {
+      document.getElementById('inputWorkoutTitle').value = t;
+    }
+
+    function startWorkoutSession() {
+      const title = document.getElementById('inputWorkoutTitle').value.trim() || 'حصة تدريبية';
+      closeModal('modal-start-workout');
+
+      activeSession = {
+        id: Date.now().toString(),
+        title: title,
+        date: formatDateKey(new Date()),
+        exercises: []
+      };
+
+      saveWorkoutDraft();
+      openActiveWorkoutScreen();
+    }
+
+    function resumeDraftWorkout() {
+      if (appData.activeDraft) {
+        activeSession = JSON.parse(JSON.stringify(appData.activeDraft));
+        openActiveWorkoutScreen();
+      }
+    }
+
+    function openActiveWorkoutScreen() {
+      document.getElementById('activeSessionTitle').innerText = activeSession.title;
+      renderActiveWorkoutExercises();
+      document.getElementById('modal-active-workout').classList.remove('hidden');
+    }
+
+    function minimizeActiveWorkout() {
+      saveWorkoutDraft();
+      document.getElementById('modal-active-workout').classList.add('hidden');
+      renderWorkouts();
+    }
+
+    // Auto-save draft on every change
+    function saveWorkoutDraft() {
+      appData.activeDraft = activeSession;
+      saveData();
+    }
+
+    function finishAndSaveWorkout() {
+      if (!activeSession || activeSession.exercises.length === 0) {
+        if (!confirm('لم تسجل أي تمارين في هذه الحصة، هل تريد حفظها فارغة؟')) return;
+      }
+      appData.workouts.unshift(activeSession);
+      appData.activeDraft = null;
+      activeSession = null;
+      saveData();
+      document.getElementById('modal-active-workout').classList.add('hidden');
+      renderAll();
+      alert('تم إنهاء وحفظ الحصة التدريبية بنجاح! 🎉');
+    }
+
+    function discardActiveWorkout() {
+      if (confirm('هل أنت متأكد من إلغاء الحصة الحالية ومسح مسودتها؟')) {
+        appData.activeDraft = null;
+        activeSession = null;
+        saveData();
+        document.getElementById('modal-active-workout').classList.add('hidden');
+        renderWorkouts();
+      }
+    }
+
+    function repeatWorkoutToToday(id) {
+      const w = appData.workouts.find(item => item.id === id);
+      if (!w) return;
+      const copy = JSON.parse(JSON.stringify(w));
+      copy.id = Date.now().toString();
+      copy.date = formatDateKey(new Date());
+      // reset completion status
+      copy.exercises.forEach(ex => {
+        ex.sets.forEach(s => s.isCompleted = false);
+      });
+      appData.workouts.unshift(copy);
+      saveData();
+      alert(`تم نسخ حصة "${w.title}" بنجاح إلى سجل اليوم لتسهيل تكرارها!`);
+      renderAll();
+    }
+
+    function deleteWorkout(id) {
+      if (confirm('هل تريد حذف هذه الحصة التدريبية نهائياً؟')) {
+        appData.workouts = appData.workouts.filter(w => w.id !== id);
+        saveData();
+        renderAll();
+      }
+    }
+
+    // Exercises in Active Workout
+    function renderActiveWorkoutExercises() {
+      const container = document.getElementById('activeWorkoutExercisesList');
+      container.innerHTML = '';
+
+      if (!activeSession || activeSession.exercises.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-12 text-slate-500 space-y-2">
+            <span class="text-4xl block">🏋️‍♂️</span>
+            <p class="text-sm font-bold">لا توجد تمارين مضافة بعد</p>
+            <p class="text-xs">اضغط بالأسفل لإضافة تمرين مثل Bench Press أو Squat.</p>
+          </div>
+        `;
+        return;
+      }
+
+      activeSession.exercises.forEach((ex, exIdx) => {
+        let setsRows = '';
+        ex.sets.forEach((set, sIdx) => {
+          setsRows += `
+            <div class="flex items-center gap-2 py-1.5 text-xs">
+              <span class="w-6 h-6 rounded-full ${set.isCompleted ? 'bg-brandGreen text-slate-950' : 'bg-slate-800 text-slate-300'} font-bold flex items-center justify-center text-[11px]">${set.setNumber}</span>
+              
+              ${set.isBodyweight ? `
+                <span class="flex-1 font-bold text-purple-400">وزن الجسم</span>
+              ` : `
+                <div class="flex items-center gap-1">
+                  <input type="number" step="any" value="${set.weight || ''}" placeholder="0"
+                         oninput="updateSetWeight(${exIdx}, ${sIdx}, this.value)"
+                         class="w-16 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-center font-bold text-white">
+                  <span class="text-slate-400 text-[11px]">كجم</span>
+                </div>
+              `}
+
+              <div class="flex items-center gap-1">
+                <input type="number" value="${set.reps || ''}" placeholder="0"
+                       oninput="updateSetReps(${exIdx}, ${sIdx}, this.value)"
+                       class="w-14 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-center font-bold text-white">
+                <span class="text-slate-400 text-[11px]">تكرار</span>
+              </div>
+
+              <!-- Bodyweight toggle -->
+              <button onclick="toggleSetBodyweight(${exIdx}, ${sIdx})" title="وزن الجسم" class="p-1 text-sm ${set.isBodyweight ? 'text-purple-400' : 'text-slate-500'}">🧍</button>
+
+              <!-- Completed Checkbox -->
+              <button onclick="toggleSetCompleted(${exIdx}, ${sIdx})" class="p-1 text-lg ${set.isCompleted ? 'text-brandGreen' : 'text-slate-600'}">✔</button>
+
+              <!-- Delete Set -->
+              <button onclick="deleteSetFromExercise(${exIdx}, ${sIdx})" class="p-1 text-slate-600 hover:text-rose-400">✕</button>
+            </div>
+          `;
+        });
+
+        container.innerHTML += `
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 space-y-3">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+              <h4 class="font-bold text-white text-base">${ex.name}</h4>
+              <button onclick="deleteExerciseFromSession(${exIdx})" class="text-xs text-rose-400">حذف التمرين ✕</button>
+            </div>
+
+            <div class="space-y-1">
+              ${setsRows}
+            </div>
+
+            <button onclick="addSetToExercise(${exIdx})" class="w-full text-xs font-bold text-purple-300 py-1.5 border border-dashed border-purple-900/60 rounded-xl hover:bg-purple-950/20 transition">
+              ＋ إضافة مجموعة
+            </button>
+          </div>
+        `;
+      });
+    }
+
+    function openAddExerciseModal() {
+      document.getElementById('inputExerciseName').value = '';
+      openModal('modal-add-exercise');
+    }
+
+    function setExerciseSuggestion(name) {
+      document.getElementById('inputExerciseName').value = name;
+    }
+
+    function addExerciseToActiveWorkout() {
+      const name = document.getElementById('inputExerciseName').value.trim();
+      if (!name) return;
+      if (!activeSession) return;
+
+      activeSession.exercises.push({
+        id: Date.now().toString(),
+        name: name,
+        sets: [
+          { setNumber: 1, weight: 20, reps: 10, isBodyweight: false, isCompleted: false }
+        ]
+      });
+
+      saveWorkoutDraft();
+      closeModal('modal-add-exercise');
+      renderActiveWorkoutExercises();
+    }
+
+    function addSetToExercise(exIdx) {
+      const ex = activeSession.exercises[exIdx];
+      const nextNum = ex.sets.length + 1;
+      const lastSet = ex.sets[ex.sets.length - 1] || {};
+      ex.sets.push({
+        setNumber: nextNum,
+        weight: lastSet.weight || 20,
+        reps: lastSet.reps || 10,
+        isBodyweight: lastSet.isBodyweight || false,
+        isCompleted: false
+      });
+      saveWorkoutDraft();
+      renderActiveWorkoutExercises();
+    }
+
+    function deleteSetFromExercise(exIdx, sIdx) {
+      activeSession.exercises[exIdx].sets.splice(sIdx, 1);
+      // Re-number
+      activeSession.exercises[exIdx].sets.forEach((s, i) => s.setNumber = i + 1);
+      saveWorkoutDraft();
+      renderActiveWorkoutExercises();
+    }
+
+    function updateSetWeight(exIdx, sIdx, val) {
+      activeSession.exercises[exIdx].sets[sIdx].weight = parseFloat(val) || 0;
+      saveWorkoutDraft();
+    }
+
+    function updateSetReps(exIdx, sIdx, val) {
+      activeSession.exercises[exIdx].sets[sIdx].reps = parseInt(val) || 0;
+      saveWorkoutDraft();
+    }
+
+    function toggleSetBodyweight(exIdx, sIdx) {
+      const s = activeSession.exercises[exIdx].sets[sIdx];
+      s.isBodyweight = !s.isBodyweight;
+      saveWorkoutDraft();
+      renderActiveWorkoutExercises();
+    }
+
+    function toggleSetCompleted(exIdx, sIdx) {
+      const s = activeSession.exercises[exIdx].sets[sIdx];
+      s.isCompleted = !s.isCompleted;
+      saveWorkoutDraft();
+      renderActiveWorkoutExercises();
+    }
+
+    function deleteExerciseFromSession(exIdx) {
+      if (confirm('هل تريد إزالة هذا التمرين من الحصة؟')) {
+        activeSession.exercises.splice(exIdx, 1);
+        saveWorkoutDraft();
+        renderActiveWorkoutExercises();
+      }
+    }
+
+    // ================= PROGRESS & CHARTS =================
+    function switchProgressTab(subIndex) {
+      if (subIndex === 0) {
+        document.getElementById('subview-exercise-progress').classList.remove('hidden');
+        document.getElementById('subview-reports').classList.add('hidden');
+        document.getElementById('progressTabBtn1').className = 'flex-1 py-2 text-xs font-bold rounded-xl bg-brandGreen text-slate-950 transition';
+        document.getElementById('progressTabBtn2').className = 'flex-1 py-2 text-xs font-bold rounded-xl text-slate-400 transition';
+        renderExerciseList();
+      } else {
+        document.getElementById('subview-exercise-progress').classList.add('hidden');
+        document.getElementById('subview-reports').classList.remove('hidden');
+        document.getElementById('progressTabBtn2').className = 'flex-1 py-2 text-xs font-bold rounded-xl bg-brandGreen text-slate-950 transition';
+        document.getElementById('progressTabBtn1').className = 'flex-1 py-2 text-xs font-bold rounded-xl text-slate-400 transition';
+        renderReports();
+      }
+    }
+
+    function getAllUniqueExercises() {
+      const set = new Set();
+      appData.workouts.forEach(w => {
+        w.exercises.forEach(ex => {
+          if (ex.name && ex.name.trim()) set.add(ex.name.trim());
+        });
+      });
+      return Array.from(set).sort();
+    }
+
+    function renderExerciseList() {
+      const query = (document.getElementById('exerciseSearchInput').value || '').trim().toLowerCase();
+      const container = document.getElementById('exercisesProgressList');
+      container.innerHTML = '';
+
+      const all = getAllUniqueExercises().filter(e => e.toLowerCase().includes(query));
+      if (all.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-500 py-8 text-center">لا توجد تمارين مسجلة تطابق البحث.</p>';
+        return;
+      }
+
+      all.forEach(name => {
+        const history = getExerciseHistory(name);
+        const pr = getExercisePR(history);
+        const last = history[history.length - 1];
+
+        container.innerHTML += `
+          <div onclick="openExerciseDetailModal('${name}')" class="bg-slate-900 border border-slate-800 rounded-3xl p-4 flex justify-between items-center cursor-pointer active:scale-98 transition">
+            <div>
+              <h4 class="font-bold text-white text-base">${name}</h4>
+              <p class="text-xs text-slate-400">${history.length} جلسات مسجلة ${last ? `• آخر أداء: ${last.maxWeight}kg × ${last.reps}` : ''}</p>
+            </div>
+            <div class="text-left">
+              <span class="text-xs text-slate-400 block">أفضل وزن</span>
+              <span class="text-base font-black text-brandPurple">${pr.weight} كجم</span>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function getExerciseHistory(name) {
+      const history = [];
+      // Sort workouts by date ascending
+      const sorted = [...appData.workouts].sort((a, b) => a.date.localeCompare(b.date));
+      sorted.forEach(w => {
+        w.exercises.forEach(ex => {
+          if (ex.name.trim().toLowerCase() === name.trim().toLowerCase()) {
+            let maxW = 0;
+            let bestReps = 0;
+            ex.sets.forEach(s => {
+              const wVal = s.isBodyweight ? 0 : (s.weight || 0);
+              if (wVal >= maxW) {
+                maxW = wVal;
+                bestReps = s.reps;
+              }
+            });
+            history.push({ date: w.date, maxWeight: maxW, reps: bestReps });
+          }
+        });
+      });
+      return history;
+    }
+
+    function getExercisePR(history) {
+      let pr = { weight: 0, reps: 0 };
+      history.forEach(h => {
+        if (h.maxWeight > pr.weight) {
+          pr = { weight: h.maxWeight, reps: h.reps };
+        }
+      });
+      return pr;
+    }
+
+    function openExerciseDetailModal(name) {
+      document.getElementById('exDetailTitle').innerText = name;
+      const history = getExerciseHistory(name);
+      const pr = getExercisePR(history);
+
+      document.getElementById('exDetailPRWeight').innerText = `${pr.weight} كجم`;
+      document.getElementById('exDetailPRReps').innerText = pr.reps ? `في ${pr.reps} تكرار` : '';
+
+      // Render SVG Line Chart
+      const chartContainer = document.getElementById('exDetailChartContainer');
+      if (history.length < 2) {
+        chartContainer.innerHTML = '<p class="text-xs text-slate-500 text-center">يتطلب رسم المنحنى جلستين تدريبيتين على الأقل لنفس التمرين.</p>';
+      } else {
+        const weights = history.map(h => h.maxWeight);
+        const minW = Math.min(...weights) * 0.9;
+        const maxW = Math.max(...weights) * 1.1 || 10;
+        const wSpan = Math.max(1, maxW - minW);
+
+        const width = 320;
+        const height = 130;
+        const stepX = width / (history.length - 1);
+
+        const points = history.map((h, i) => {
+          const x = i * stepX;
+          const y = height - ((h.maxWeight - minW) / wSpan) * height;
+          return { x, y, weight: h.maxWeight, date: h.date };
+        });
+
+        const pointsPath = points.map(p => `${p.x},${p.y}`).join(' L ');
+
+        chartContainer.innerHTML = `
+          <svg viewBox="0 0 ${width} ${height}" class="w-full h-full overflow-visible">
+            <path d="M ${pointsPath}" fill="none" stroke="#a855f7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+            ${points.map(p => `
+              <circle cx="${p.x}" cy="${p.y}" r="4" fill="#a855f7" stroke="#0f172a" stroke-width="2" />
+              <text x="${p.x}" y="${p.y - 8}" fill="#e2e8f0" font-size="9" font-weight="bold" text-anchor="middle">${p.weight}</text>
+            `).join('')}
+          </svg>
+        `;
+      }
+
+      // History List
+      const historyList = document.getElementById('exDetailHistoryList');
+      historyList.innerHTML = '<span class="text-xs text-slate-400 font-bold block mb-1">السجلات السابقة</span>';
+      [...history].reverse().forEach(h => {
+        historyList.innerHTML += `
+          <div class="flex justify-between items-center bg-slate-800/60 p-2.5 rounded-xl text-xs">
+            <span class="text-slate-300 font-semibold">${h.date}</span>
+            <span class="text-purple-300 font-bold">${h.maxWeight} كجم × ${h.reps} تكرار</span>
+          </div>
+        `;
+      });
+
+      openModal('modal-exercise-detail');
+    }
+
+    // ================= REPORTS & STATISTICS =================
+    function setTimeframe(days) {
+      currentStatsDays = days;
+      document.querySelectorAll('.timeframe-btn').forEach(btn => {
+        if (parseInt(btn.dataset.days) === days) {
+          btn.className = 'flex-1 py-1.5 rounded-lg timeframe-btn bg-slate-800 text-white font-bold';
+        } else {
+          btn.className = 'flex-1 py-1.5 rounded-lg timeframe-btn text-slate-400';
+        }
+      });
+      renderReports();
+    }
+
+    function renderReports() {
+      const now = new Date();
+      let filteredFoods = appData.foods;
+      let filteredWorkouts = appData.workouts;
+
+      if (currentStatsDays > 0) {
+        const threshold = new Date();
+        threshold.setDate(now.getDate() - currentStatsDays);
+        const thresholdKey = formatDateKey(threshold);
+        filteredFoods = appData.foods.filter(f => f.date >= thresholdKey);
+        filteredWorkouts = appData.workouts.filter(w => w.date >= thresholdKey);
+      }
+
+      // Group foods by day
+      const dayMap = {};
+      filteredFoods.forEach(f => {
+        if (!dayMap[f.date]) dayMap[f.date] = { cals: 0, prot: 0, carbs: 0, fat: 0 };
+        dayMap[f.date].cals += f.calories || 0;
+        dayMap[f.date].prot += f.protein || 0;
+        dayMap[f.date].carbs += f.carbs || 0;
+        dayMap[f.date].fat += f.fat || 0;
+      });
+
+      const loggedDays = Object.keys(dayMap);
+      const count = loggedDays.length;
+
+      let avgCals = 0, avgProt = 0, avgCarbs = 0, avgFat = 0, adherenceDays = 0;
+      const targetCals = appData.goals ? appData.goals.calories : 0;
+
+      if (count > 0) {
+        loggedDays.forEach(d => {
+          avgCals += dayMap[d].cals;
+          avgProt += dayMap[d].prot;
+          avgCarbs += dayMap[d].carbs;
+          avgFat += dayMap[d].fat;
+          if (targetCals > 0) {
+            const diff = Math.abs(dayMap[d].cals - targetCals);
+            if (diff <= targetCals * 0.10) adherenceDays++;
+          }
+        });
+        avgCals = Math.round(avgCals / count);
+        avgProt = Math.round((avgProt / count) * 10) / 10;
+        avgCarbs = Math.round((avgCarbs / count) * 10) / 10;
+        avgFat = Math.round((avgFat / count) * 10) / 10;
+      }
+
+      const grid = document.getElementById('statsGrid');
+      grid.innerHTML = `
+        <div class="bg-slate-900 border border-slate-800 p-4 rounded-3xl">
+          <span class="text-xs text-slate-400 block">متوسط السعرات</span>
+          <span class="text-2xl font-black text-brandOrange">${avgCals} kcal</span>
+          <span class="text-[11px] text-slate-500 block mt-1">${count} أيام مسجلة</span>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 p-4 rounded-3xl">
+          <span class="text-xs text-slate-400 block">أيام الالتزام بالهدف</span>
+          <span class="text-2xl font-black text-brandGreen">${adherenceDays} يوم</span>
+          <span class="text-[11px] text-slate-500 block mt-1">ضمن هامش ±10%</span>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 p-4 rounded-3xl">
+          <span class="text-xs text-slate-400 block">متوسط البروتين</span>
+          <span class="text-2xl font-black text-blue-400">${avgProt} g</span>
+        </div>
+        <div class="bg-slate-900 border border-slate-800 p-4 rounded-3xl">
+          <span class="text-xs text-slate-400 block">الحصص التدريبية</span>
+          <span class="text-2xl font-black text-purple-400">${filteredWorkouts.length}</span>
+        </div>
+      `;
+
+      // Top exercises
+      const exCount = {};
+      filteredWorkouts.forEach(w => {
+        w.exercises.forEach(e => {
+          const n = e.name.trim();
+          exCount[n] = (exCount[n] || 0) + 1;
+        });
+      });
+      const sortedEx = Object.entries(exCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+      const topList = document.getElementById('topExercisesList');
+      topList.innerHTML = '';
+      if (sortedEx.length === 0) {
+        topList.innerHTML = '<p class="text-xs text-slate-500 py-1">لا توجد تمارين مسجلة في هذه الفترة.</p>';
+      } else {
+        sortedEx.forEach(([name, num]) => {
+          topList.innerHTML += `
+            <div class="flex justify-between items-center text-xs py-1 border-b border-slate-800/60 last:border-0">
+              <span class="text-slate-200 font-semibold">${name}</span>
+              <span class="text-purple-300 font-bold">${num} مرات</span>
+            </div>
+          `;
+        });
+      }
+    }
+
+    // ================= SETTINGS & BACKUP =================
+    function renderSettings() {
+      if (appData.goals) {
+        document.getElementById('settingsCalGoal').innerText = `${appData.goals.calories} kcal`;
+        document.getElementById('settingsProtGoal').innerText = `${appData.goals.protein} g`;
+        document.getElementById('settingsCarbGoal').innerText = `${appData.goals.carbs} g`;
+        document.getElementById('settingsFatGoal').innerText = `${appData.goals.fat} g`;
+      }
+    }
+
+    function exportJSONBackup() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `AzizCal_Backup_${formatDateKey(new Date())}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importJSONBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (parsed && typeof parsed === 'object') {
+            appData = { ...appData, ...parsed };
+            saveData();
+            renderAll();
+            alert('تم استيراد النسخة الاحتياطية بنجاح!');
+          }
+        } catch (err) {
+          alert('ملف النسخة الاحتياطية غير صالح!');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function exportCSV(type) {
+      let csv = '';
+      if (type === 'nutrition') {
+        csv = "التاريخ,الوجبة,اسم الطعام,الكمية,الوحدة,السعرات,البروتين,الكربوهيدرات,الدهون\n";
+        appData.foods.forEach(f => {
+          csv += `"${f.date}","${f.mealType}","${f.name}","${f.amount}","${f.unit}","${f.calories}","${f.protein}","${f.carbs}","${f.fat}"\n`;
+        });
+      } else {
+        csv = "التاريخ,الحصة,التمرين,المجموعة,الوزن_كجم,التكرارات,وزن_جسم\n";
+        appData.workouts.forEach(w => {
+          w.exercises.forEach(ex => {
+            ex.sets.forEach(s => {
+              csv += `"${w.date}","${w.title}","${ex.name}","${s.setNumber}","${s.isBodyweight ? 0 : s.weight}","${s.reps}","${s.isBodyweight ? 'نعم' : 'لا'}"\n`;
+            });
+          });
+        });
+      }
+
+      const encodedUri = "data:text/csv;charset=utf-8,\uFEFF" + encodeURI(csv);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `AzizCal_${type}_${formatDateKey(new Date())}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+
+    function confirmResetGoals() {
+      if (confirm('هل تريد إعادة تعيين الأهداف اليومية فقط؟ لن يتم حذف أي من سجلات وجباتك أو تمارينك السابقة.')) {
+        appData.goals = null;
+        saveData();
+        openGoalsModal(true);
+      }
+    }
+
+    function confirmResetAll() {
+      if (confirm('تحذير: هل أنت متأكد تماماً من رغبتك في مسح كافة البيانات نهائياً؟')) {
+        if (confirm('تأكيد نهائي: ستفقد كافة السجلات مالم تكن قد أخذت نسخة احتياطية.')) {
+          localStorage.removeItem(STORAGE_KEY);
+          location.reload();
+        }
+      }
+    }
+
+    // ================= MODAL HELPERS =================
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
