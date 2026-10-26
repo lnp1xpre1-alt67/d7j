@@ -1,0 +1,30 @@
+workflows:
+  ios-workflow:
+    name: Build iOS IPA
+    instance_type: mac_mini_m1
+    max_build_duration: 15
+    environment:
+      xcode: latest
+    scripts:
+      - name: Build and Package IPA
+        script: |
+          if [ -d "azizcal_" ]; then
+            cd azizcal_
+          fi
+          xcodebuild build \
+            -project AzizCal.xcodeproj \
+            -target AzizCal \
+            -configuration Release \
+            -sdk iphoneos \
+            CONFIGURATION_BUILD_DIR=build/Release \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES
+          
+          mkdir -p Payload
+          cp -R build/Release/AzizCal.app Payload/
+          zip -r -y AzizCal.ipa Payload
+          ls -lh AzizCal.ipa
+    artifacts:
+      - "**/AzizCal.ipa"
